@@ -23,22 +23,34 @@ generate(){
   if [ -z "$n" ] ; then
     n=100
   fi
+  ext=mov
   case $2 in
-    0)  outmp4=$outdir/$bname.mix.mp4 ;;
-    1)  outmp4=$outdir/$bname.tri.mp4 ;;
-    2)  outmp4=$outdir/$bname.rec.mp4 ;;
-    3)  outmp4=$outdir/$bname.ell.mp4 ;;
-    4)  outmp4=$outdir/$bname.cir.mp4 ;;
-    5)  outmp4=$outdir/$bname.rot.mp4 ;;
+    0)  outmp4=$outdir/$bname.mix.$ext ;;
+    1)  outmp4=$outdir/$bname.tri.$ext ;;
+    2)  outmp4=$outdir/$bname.rec.$ext ;;
+    3)  outmp4=$outdir/$bname.ell.$ext ;;
+    4)  outmp4=$outdir/$bname.cir.$ext ;;
+    5)  outmp4=$outdir/$bname.rot.$ext ;;
   esac
   if [ ! -f $outmp4 ] ; then
+    T1=$(date +%s);
+
+    echo "--- $outmp4 ---"
     echo "* Generate frames ..."
-    uniq=$bname.$$
-    $primitive -i "$1" -r 256 -o $tmpdir/$uniq.%04d.png -n $n -m $2
+    uniq=$bname
+    tmpfiles=$tmpdir/$uniq.%04d.png
+    $primitive -i "$1" -r 256 -s 1080 -o $tmpfiles -n $n -m $2
+    T2=$(date +%s);
+
     echo "* Compile to $outmp4 ..."
-    ffmpeg -r 50 -i $tmpdir/$uniq.%04d.png -b:v 5M -r 25 -y $outmp4 2> /dev/null
+    ffmpeg -r 50 -i $tmpfiles -b:v 5M -r 25 -y $outmp4 2> /dev/null
+    T3=$(date +%s);
+
     echo "* Cleanup ..."
     rm $tmpdir/$uniq.*.png
+    T4=$(date +%s);
+    SECS=$((T4-T1))
+    echo "* $SECS seconds to create the MOV"
   fi
 }
 
