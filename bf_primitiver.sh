@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "" ] ; then
-  echo "Usage: $0 [file]" >&2
+  echo "Usage: $0 [file/folder]" >&2
   exit
 fi
 
@@ -35,22 +35,22 @@ generate(){
   if [ ! -f $outmp4 ] ; then
     T1=$(date +%s);
 
-    echo "--- $outmp4 ---"
-    echo "* Generate frames ..."
     uniq=$bname
     tmpfiles=$tmpdir/$uniq.%04d.png
+
+    echo "> EXTRACT $bname"
     $primitive -i "$1" -r 256 -s 1080 -o $tmpfiles -n $n -m $2
     T2=$(date +%s);
+    SECS=$((T2-T1))
+    echo "> in $SECS seconds"
 
-    echo "* Compile to $outmp4 ..."
+    echo "> COMPILE $(basename $outmp4) ..."
     ffmpeg -r 50 -i $tmpfiles -b:v 5M -r 25 -y $outmp4 2> /dev/null
     T3=$(date +%s);
+    SECS=$((T3-T1))
+    echo "> in $SECS seconds"
 
-    echo "* Cleanup ..."
     rm $tmpdir/$uniq.*.png
-    T4=$(date +%s);
-    SECS=$((T4-T1))
-    echo "* $SECS seconds to create the MOV"
   fi
 }
 
